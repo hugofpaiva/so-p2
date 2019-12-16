@@ -32,7 +32,6 @@
 #include "semaphore.h"
 #include "sharedMemory.h"
 
-
 /** \brief logging file name */
 static char nFic[51];
 
@@ -45,73 +44,82 @@ static int semgid;
 /** \brief pointer to shared memory region */
 static SHARED_DATA *sh;
 
-static void prepareIngredients ();
-static void waitForCigarette ();
-static void closeFactory ();
+static void prepareIngredients();
+static void waitForCigarette();
+static void closeFactory();
 
 /**
  *  \brief Main program.
  *
  *  Its role is to generate the life cycle of one of intervening entities in the problem: the agent.
  */
-int main (int argc, char *argv[])
+int main(int argc, char *argv[])
 {
-    int key;                                          /*access key to shared memory and semaphore set */
-    char *tinp;                                                     /* numerical parameters test flag */
+    int key;    /*access key to shared memory and semaphore set */
+    char *tinp; /* numerical parameters test flag */
 
     /* validation of command line parameters */
 
-    if (argc != 4) { 
-        freopen ("error_AG", "a", stderr);
-        fprintf (stderr, "Number of parameters is incorrect!\n");
+    if (argc != 4)
+    {
+        freopen("error_AG", "a", stderr);
+        fprintf(stderr, "Number of parameters is incorrect!\n");
         return EXIT_FAILURE;
     }
-    else {
-       freopen (argv[3], "w", stderr);
-       setbuf(stderr,NULL);
+    else
+    {
+        freopen(argv[3], "w", stderr);
+        setbuf(stderr, NULL);
     }
-    strcpy (nFic, argv[1]);
-    key = (unsigned int) strtol (argv[2], &tinp, 0);
-    if (*tinp != '\0') {
-        fprintf (stderr, "Error on the access key communication!\n");
+    strcpy(nFic, argv[1]);
+    key = (unsigned int)strtol(argv[2], &tinp, 0);
+    if (*tinp != '\0')
+    {
+        fprintf(stderr, "Error on the access key communication!\n");
         return EXIT_FAILURE;
     }
 
     /* connection to the semaphore set and the shared memory region and mapping the shared region onto the
        process address space */
-    if ((semgid = semConnect (key)) == -1) { 
-        perror ("error on connecting to the semaphore set");
+    if ((semgid = semConnect(key)) == -1)
+    {
+        perror("error on connecting to the semaphore set");
         return EXIT_FAILURE;
     }
-    if ((shmid = shmemConnect (key)) == -1) { 
-        perror ("error on connecting to the shared memory region");
+    if ((shmid = shmemConnect(key)) == -1)
+    {
+        perror("error on connecting to the shared memory region");
         return EXIT_FAILURE;
     }
-    if (shmemAttach (shmid, (void **) &sh) == -1) { 
-        perror ("error on mapping the shared region on the process address space");
+    if (shmemAttach(shmid, (void **)&sh) == -1)
+    {
+        perror("error on mapping the shared region on the process address space");
         return EXIT_FAILURE;
     }
 
     /* initialize random generator */
-    srandom ((unsigned int) getpid ());                                      
+    srandom((unsigned int)getpid());
 
     /* simulation of the life cycle of the agent */
 
-    int nOrders=0;
-    while(nOrders < sh->fSt.nOrders) {
-       prepareIngredients();
-       waitForCigarette();
+    int nOrders = 0;
+    while (nOrders < sh->fSt.nOrders)
+    {
+        prepareIngredients();
+        waitForCigarette();
 
-       nOrders++;
+        nOrders++;
     }
 
     closeFactory();
 
     /* unmapping the shared region off the process address space */
 
-    if (shmemDettach (sh) == -1) { 
-        perror ("error on unmapping the shared region off the process address space");
-        return EXIT_FAILURE;;
+    if (shmemDettach(sh) == -1)
+    {
+        perror("error on unmapping the shared region off the process address space");
+        return EXIT_FAILURE;
+        ;
     }
 
     return EXIT_SUCCESS;
@@ -124,24 +132,43 @@ int main (int argc, char *argv[])
  *  The inventory is updated to new existences of ingredients.
  *  Both ingredients generated should be notified to watcher using different semaphores. 
  */
-static void prepareIngredients ()
+static void prepareIngredients()
 {
 
-
-    if (semDown (semgid, sh->mutex) == -1) {                                                      /* enter critical region */
-        perror ("error on the up operation for semaphore access (AG)");
-        exit (EXIT_FAILURE);
+    if (semDown(semgid, sh->mutex) == -1)
+    { /* enter critical region */
+        perror("error on the up operation for semaphore access (AG)");
+        exit(EXIT_FAILURE);
+    }
+    //Vou mudar o estado do agente para preparing pq vou começar a preparar os ingredientes
+    sh->fSt.st.agentStat = PREPARING;
+    saveState(nFic, &sh->fSt); //dentro da zona crítica faço o save
+    // why detro da zona crítica?
+    int ing1 = rand() % 3;
+    int ing2 = rand() % 3;
+    if (ing1 == ing2)
+    {
+        ing2 = rand() % 3;
     }
 
     /* TODO: insert your code here */
 
-    if (semUp (semgid, sh->mutex) == -1) {                                                        /* leave critical region */
-        perror ("error on the up operation for semaphore access (AG)");
-        exit (EXIT_FAILURE);
+    if (semUp(semgid, sh->mutex) == -1)
+    { /* leave critical region */
+        perror("error on the up operation for semaphore access (AG)");
+        exit(EXIT_FAILURE);
     }
-
+    if (semUp(semgid, sh->ingredient[ing1]) == -1) //Ingrediente 1 passou a estar disponível
+    {
+        perror("error on the up operation for semaphore access (AG)");
+        exit(EXIT_FAILURE);
+    }
+    if (semUp(semgid, sh->ingredient[ing2]) == -1) //Ingrediente 2 passou a estar disponível
+    {
+        perror("error on the up operation for semaphore access (AG)");
+        exit(EXIT_FAILURE);
+    }
     /* TODO: insert your code here */
-
 }
 
 /**
@@ -150,20 +177,27 @@ static void prepareIngredients ()
  *  The agent waits until the smoker completes the rolling of the cigarette. 
  *  The internal state should be updated.
  */
-static void waitForCigarette ()
+static void waitForCigarette()
 {
-    if (semDown (semgid, sh->mutex) == -1) {                                                      /* enter critical region */
-        perror ("error on the up operation for semaphore access (AG)");
-        exit (EXIT_FAILURE);
+    if (semDown(semgid, sh->mutex) == -1)
+    { /* enter critical region */
+        perror("error on the up operation for semaphore access (AG)");
+        exit(EXIT_FAILURE);
     }
-
+    sh->fSt.st.agentStat = WAITING_CIG; //Mudar o estado para waiting_cig
+    saveState(nFic, &sh->fSt);          //guardar dentro da memoria partilhada
     /* TODO: insert your code here */
 
-    if (semUp (semgid, sh->mutex) == -1) {                                                        /* leave critical region */
-        perror ("error on the up operation for semaphore access (AG)");
-        exit (EXIT_FAILURE);
+    if (semUp(semgid, sh->mutex) == -1)
+    { /* leave critical region */
+        perror("error on the up operation for semaphore access (AG)");
+        exit(EXIT_FAILURE);
     }
-
+    if (semDown(semgid, sh->waitCigarette) == -1) //down pq fico à espera que espere de enrolar
+    {
+        perror("error on the up operation for semaphore access (AG)");
+        exit(EXIT_FAILURE);
+    }
     /* TODO: insert your code here */
 }
 
@@ -172,20 +206,25 @@ static void waitForCigarette ()
  *
  *  The agent updates state and notifies watchers that the factory is closing. 
  */
-static void closeFactory ()
+static void closeFactory()
 {
-    if (semDown (semgid, sh->mutex) == -1) {                                                      /* enter critical region */
-        perror ("error on the up operation for semaphore access (AG)");
-        exit (EXIT_FAILURE);
+    if (semDown(semgid, sh->mutex) == -1)
+    { /* enter critical region */
+        perror("error on the up operation for semaphore access (AG)");
+        exit(EXIT_FAILURE);
     }
-
+    sh->fSt.st.agentStat = CLOSING_A; //Mudar o estado para a fechar
+    saveState(nFic, &sh->fSt);          //guardar dentro da memoria partilhada
     /* TODO: insert your code here */
+    sh->fSt.closing =true;
 
-    if (semUp (semgid, sh->mutex) == -1) {                                                        /* leave critical region */
-        perror ("error on the up operation for semaphore access (AG)");
-        exit (EXIT_FAILURE);
+    if (semUp(semgid, sh->mutex) == -1)
+    { /* leave critical region */
+        perror("error on the up operation for semaphore access (AG)");
+        exit(EXIT_FAILURE);
     }
+//-----------------------------------------------------//
+    //Falta semáforo para notificar o watcher
 
     /* TODO: insert your code here */
 }
-
