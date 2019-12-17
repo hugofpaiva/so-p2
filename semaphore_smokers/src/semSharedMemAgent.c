@@ -146,8 +146,9 @@ static void prepareIngredients()
     // why detro da zona crítica?
     int ing1 = rand() % 3;
     int ing2 = rand() % 3;
-    if (ing1 == ing2)
+    while (ing1 == ing2)
     {
+
         ing2 = rand() % 3;
     }
 
@@ -214,16 +215,16 @@ static void closeFactory()
         exit(EXIT_FAILURE);
     }
     sh->fSt.st.agentStat = CLOSING_A; //Mudar o estado para a fechar
-    saveState(nFic, &sh->fSt);          //guardar dentro da memoria partilhada
+    saveState(nFic, &sh->fSt);        //guardar dentro da memoria partilhada
     /* TODO: insert your code here */
-    sh->fSt.closing =true;
+    sh->fSt.closing = true;
 
     if (semUp(semgid, sh->mutex) == -1)
     { /* leave critical region */
         perror("error on the up operation for semaphore access (AG)");
         exit(EXIT_FAILURE);
     }
-//-----------------------------------------------------//
+    //-----------------------------------------------------//
     //Falta semáforo para notificar o watcher
 
     /* TODO: insert your code here */
