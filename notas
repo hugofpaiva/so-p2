@@ -1,0 +1,49 @@
+sharedDataSync.h
+os índices servem para fazermos up e down nos semáforos
+semUp(semgid, sh -> mutex)
+semDown(semgid, sh-> ingredient[0])
+
+semgid já está definido, isto serve para fazermos as notificações e bloqueios que acharmos necessarios
+
+STAT -> agentStat guarda o estado do agente.. watcherStat[0] - estado do watcher 0...
+cada entidade altera apenas o seu estado! o agente nao altera o estado nem do watcher nem do smoker, cada um só se pode alterar a si mesmo 
+
+sh -> fst,st,watcherStat[1] = WAITING_ING; (o waiting vem do fich probConst.h -> contem as constantes que devemos usar para qualquer estado das entidades)
+isto altera o estado! temos de guardar a alteração a seguir, isto ja altera o valor na memoria partilhada mas a seguir devemos fazer savestate, nao altera o que esta na shared mem mas add uma cena à tabela para verificar se está tudo bem
+saveState(nFic, &sh->fst) - nFic já está definido
+
+este tipo de coisas é feito apenas DENTRO da região critica!! save state e alterações de estado
+
+Sempre que fazemos semup e semdown devemos verificar se eles correram bem (o mutex já está a fazer isso)
+
+CLEAN
+$cd src
+$make all_bin
+$cd ../run
+$./probSumSharedMemSmokers  (Quando fazemos isto, basicamente estamos a correr o programas, e estamos a correr todos os binários que foram fornecidos e não a testar o nosso código)
+...
+$cd ../src
+$make sm  (Compila o nosso smoker mas usa os binários que já existem do agente do wathcer)
+$cd ../run
+$./probSemSharedMemSmokers
+...
+(Para terminar isto, como o nosso código ainda não está bem, vai dar deadlock e vamos ter de fazer ctr+c. O probleam é que o ainda há cenas na memória e vamos ter de as apagar.)
+
+$ipcs (cria uma tabela com todos os recursos que estão a ser usados na memória, é daqui que vamos buscar a key. Podem aparecer várias e temos de ir buscar a nossa. As chaves estão na 1ª coluna)
+
+
+Para apagar as cenas do programa anterior, vamos usar a key do array de semáforos ou da memória partilhada (na verdade a key é igual) e vamos editar o ficheiro clean.sh, alterando a key para a correta.
+
+Agora o $./clean.sh vai eliminar os recursos que não são os nossos.
+
+no final é da responsabilidade do agente acordar os watchers e eles acordam os smokers para terminarem. o flag closing esta em mem partilhada, ao acordar a 1º cena a fazer é verificar o valor dessa flag -> se o closing ja estiver verdadeiro, entoa nao fazem o que é habitual mas sim aquilo para fechar. No caso dos smokers é apenas terminar se estiverem no waiting. No caso dos watchers devem sinalizar o smoker para ele acordar e terminar. A ideia é usar um semáforo para o acordar e para ele terminar, não obriga-lo a terminar. Quem ativa esta flag é o agente
+
+os ficheiros .h estao completamente estruturados, nao é preciso mudar nada
+
+no semSharedMemSmoker.c, a função void smoke(int id) já é chamada sempre com os valores certos, apenas temos de entender o que fazer nessa função
+só é preciso mexer em 3 fich, semSharedMemSmoker, semSharedMemAgent e semSharedMemWatcher
+______________________________________
+double rollingTime = 100.0 + normalRand(30.0) 
+o rolling time vai ser uma var aleatoria que tem uma distribuição normal c média 100 e um desvio padrao 30
+
+a p é baixa mas pode acontecer o rolling time ser negativo -> if (rollingTime > 0.0) { sleep(rollingTime) }
