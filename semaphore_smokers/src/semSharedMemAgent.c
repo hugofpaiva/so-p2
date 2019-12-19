@@ -142,7 +142,7 @@ static void prepareIngredients()
     }
     //Vou mudar o estado do agente para preparing pq vou começar a preparar os ingredientes
     sh->fSt.st.agentStat = PREPARING;
-    saveState(nFic, &sh->fSt); //dentro da zona crítica faço o save
+
     int ing1 = rand() % 3;
     int ing2 = rand() % 3;
     while (ing1 == ing2)
@@ -150,7 +150,9 @@ static void prepareIngredients()
 
         ing2 = rand() % 3;
     }
-
+    sh->fSt.ingredients[ing1]++;
+    sh->fSt.ingredients[ing2]++;
+    saveState(nFic, &sh->fSt); //dentro da zona crítica faço o save
     /* TODO: insert your code here */
 
     if (semUp(semgid, sh->mutex) == -1)
@@ -237,7 +239,7 @@ static void closeFactory()
         exit(EXIT_FAILURE);
     }
 
-    if (semUp(semgid, sh->ingredient[2]) == -1) 
+    if (semUp(semgid, sh->ingredient[2]) == -1)
     {
         perror("error on the up operation for semaphore access (AG)");
         exit(EXIT_FAILURE);
