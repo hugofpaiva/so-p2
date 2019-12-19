@@ -150,6 +150,11 @@ static double normalRand(double stddev)
 static bool waitForIngredients (int id)
 {
     bool ret = true;
+    
+    if(semDown (semgid,sh->wait2Ings[id]) == -1) {
+           perror ("error on the down operation for semaphore access while doing wait2Ings");
+            exit (EXIT_FAILURE);
+       }
 
     if (semDown (semgid, sh->mutex) == -1)  {                                                     /* enter critical region */
         perror ("error on the up operation for semaphore access (SM)");
@@ -157,6 +162,7 @@ static bool waitForIngredients (int id)
     }
 
     /* TODO: insert your code here */
+       
 
     if (semUp (semgid, sh->mutex) == -1) {                                                         /* exit critical region */
         perror ("error on the down operation for semaphore access (SM)");

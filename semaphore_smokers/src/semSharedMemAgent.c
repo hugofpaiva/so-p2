@@ -143,7 +143,6 @@ static void prepareIngredients()
     //Vou mudar o estado do agente para preparing pq vou começar a preparar os ingredientes
     sh->fSt.st.agentStat = PREPARING;
     saveState(nFic, &sh->fSt); //dentro da zona crítica faço o save
-    // why detro da zona crítica?
     int ing1 = rand() % 3;
     int ing2 = rand() % 3;
     while (ing1 == ing2)
@@ -215,9 +214,8 @@ static void closeFactory()
         exit(EXIT_FAILURE);
     }
     sh->fSt.st.agentStat = CLOSING_A; //Mudar o estado para a fechar
-    saveState(nFic, &sh->fSt);        //guardar dentro da memoria partilhada
-    /* TODO: insert your code here */
     sh->fSt.closing = true;
+    saveState(nFic, &sh->fSt); //guardar dentro da memoria partilhada
 
     if (semUp(semgid, sh->mutex) == -1)
     { /* leave critical region */
@@ -228,4 +226,22 @@ static void closeFactory()
     //Falta semáforo para notificar o watcher
 
     /* TODO: insert your code here */
+    //Como os watchers estão à espera de ingredientes, eu ao dizer que os ingredientes estão disponíveis, acordo-os para eles dps fecharem
+    if (semUp(semgid, sh->ingredient[0]) == -1)
+    {
+        perror("error on the up operation for semaphore access (AG)");
+        exit(EXIT_FAILURE);
+    }
+
+    if (semUp(semgid, sh->ingredient[1]) == -1)
+    {
+        perror("error on the up operation for semaphore access (AG)");
+        exit(EXIT_FAILURE);
+    }
+
+    if (semUp(semgid, sh->ingredient[2]) == -1) 
+    {
+        perror("error on the up operation for semaphore access (AG)");
+        exit(EXIT_FAILURE);
+    }
 }
