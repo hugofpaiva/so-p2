@@ -222,8 +222,6 @@ static void closeFactory()
         perror("error on the up operation for semaphore access (AG)");
         exit(EXIT_FAILURE);
     }
-    //-----------------------------------------------------//
-    //Falta semáforo para notificar o watcher
 
     /* TODO: insert your code here */
     //Como os watchers estão à espera de ingredientes, eu ao dizer que os ingredientes estão disponíveis, acordo-os para eles dps fecharem
