@@ -1,0 +1,155 @@
+\documentclass[10pt,portuguese]{article}
+
+\usepackage{fourier}
+
+\usepackage[]{graphicx}
+\usepackage[]{color}
+\usepackage{xcolor}
+\usepackage{alltt}
+\usepackage{listings}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\setlength{\parskip}{\smallskipamount}
+\setlength{\parindent}{5ex}
+\usepackage{indentfirst}
+\usepackage{listings}
+\usepackage{setspace}
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=auburn,
+    filecolor=magenta,      
+    urlcolor=blue, urlsize=2em
+}
+
+% Set page margins
+\usepackage[top=100pt,bottom=100pt,left=68pt,right=66pt]{geometry}
+
+% Package used for placeholder text
+\usepackage{lipsum}
+
+% Prevents LaTeX from filling out a page to the bottom
+\raggedbottom
+
+
+\usepackage{fancyhdr}
+\fancyhf{} 
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0pt} 
+\pagestyle{fancy}
+
+\usepackage{titlesec}
+\titleformat{\chapter}
+   {\normalfont\LARGE\bfseries}{\thechapter.}{1em}{}
+\titlespacing{\chapter}{0pt}{50pt}{2\baselineskip}
+
+\usepackage{float}
+\floatstyle{plaintop}
+\restylefloat{table}
+
+\usepackage[tableposition=top]{caption}
+
+
+
+\frontmatter
+
+\definecolor{light-gray}{gray}{0.95}
+
+\renewcommand{\contentsname}{Índice}
+
+\begin{document}
+
+\selectlanguage{portuguese}
+
+\begin{titlepage}
+	\clearpage\thispagestyle{empty}
+	\centering
+	\vspace{2cm}
+
+	
+	{\Large  Sistemas Operativos \par}
+	\vspace{0.5cm}
+	{\small Professor: \\
+	José Nuno Panelas Nunes Lau\par}
+	\vspace{4cm}
+	{ \textbf{Problema genérico de gestão de recursos:}} \\
+	\vspace{0.5cm}
+	{\Huge \textbf{Fumadores}} \\
+	\vspace{1cm}
+	\vspace{4cm}
+	{\normalsize Carolina Araújo, 93248 \\ 
+	             Hugo Paiva, 93195
+	   \par}
+	   	{\tiny
+	Igual distribuição de trabalho \\entre os dois membros\par}
+	\vspace{2cm}
+
+    \includegraphics[scale=0.20]{images/logo_ua.png}
+    
+    \vspace{2cm}
+    
+	{\normalsize DETI \\ 
+		Universidade de Aveiro \par}
+		
+	{\normalsize 30-12-2019 \par}
+	\vspace{2cm}
+		
+	
+	\pagebreak
+
+\end{titlepage}
+\tableofcontents{}
+\clearpage
+
+\section{Introdução}
+\par Este trabalho prático foi desenvolvido com o objetivo de compreender os mecanismos associados à execução de processos e \textit{threads}. 
+
+\par Para empreender este propósito, foi pedido que se solucionasse um problema que envolve vários fumadores com necessidades distintas para fumar. Dito isto, implementou-se um programa em C que simula e soluciona o problema recorrendo a semáforos e a memória partilhada, de modo a sincronizar os vários processos independentes.
+
+\clearpage
+
+\section{Contextualização}
+
+\subsection{Sincronização}
+
+Explicar por alto como funcionam os semáforos e threads
+
+\clearpage
+
+\subsection{O Problema dos Fumadores}
+
+Explicar o problema
+
+\clearpage
+
+\section{Implementação}
+
+Explicar as implementações
+
+\clearpage
+
+\section{Resultados}
+
+Straight foward
+
+\clearpage
+
+\section{Conclusão}
+
+Straight foward
+
+\clearpage
+
+\section{Bibliografia}
+
+\bibliographystyle{plain}
+
+\bibliography{biblist}
+
+\vspace{5mm} %5mm vertical space
+
+[1] \url{O Deus LAU}
+
+
+\end{document}
+
