@@ -2,13 +2,15 @@
 
 ## Titulo
 
-Introdução
+Este trabalho prático foi desenvolvido com o objetivo de compreender os mecanismos associados à execução de processos e *threads*. 
+
+Para empreender este propósito, foi pedido que se solucionasse um problema que envolve vários fumadores com necessidades distintas para fumar. Dito isto, implementou-se um programa em *C* que simula e soluciona o problema recorrendo a semáforos e a memória partilhada, de modo a sincronizar os vários processos independentes.
 
 ##  Preparação
 Estas instruções ajudarão a executar os programas desenvolvidos.
 
 ### Requisitos
-Para compilar os programas, é necessário ter instalado um compilador de C na sua máquina, como por exemplo gcc. 
+Para compilar os programas, é necessário ter instalado um compilador de *C* na sua máquina, como por exemplo *gcc*. 
 As próximas instruções devem ser executadas na raiz do repositório.
 
 ### Compilar
