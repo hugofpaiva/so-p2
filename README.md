@@ -1,6 +1,6 @@
 # Sistemas Operativos - Trabalho 2
 
-## Titulo
+## Problema genérico de gestão de recursos: Fumadores
 
 Este trabalho prático foi desenvolvido com o objetivo de compreender os mecanismos associados à execução de processos e *threads*. 
 
