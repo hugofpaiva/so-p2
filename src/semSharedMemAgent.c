@@ -140,37 +140,39 @@ static void prepareIngredients()
         perror("error on the up operation for semaphore access (AG)");
         exit(EXIT_FAILURE);
     }
-    //Vou mudar o estado do agente para preparing pq vou começar a preparar os ingredientes
+    //Vou mudar o estado do agente para preparing porque vou começar a preparar os ingredientes
     sh->fSt.st.agentStat = PREPARING;
 
     int ing1 = rand() % 3;
     int ing2 = rand() % 3;
+
     while (ing1 == ing2)
     {
 
         ing2 = rand() % 3;
     }
+    // guardar os ingredientes fabricados no inventário
     sh->fSt.ingredients[ing1]++;
     sh->fSt.ingredients[ing2]++;
-    saveState(nFic, &sh->fSt); //dentro da zona crítica faço o save
-    /* TODO: insert your code here */
+    saveState(nFic, &sh->fSt);
 
     if (semUp(semgid, sh->mutex) == -1)
     { /* leave critical region */
         perror("error on the up operation for semaphore access (AG)");
         exit(EXIT_FAILURE);
     }
-    if (semUp(semgid, sh->ingredient[ing1]) == -1) //Ingrediente 1 passou a estar disponível
+
+    if (semUp(semgid, sh->ingredient[ing1]) == -1) //Ingrediente 1 passou a estar disponível. Vou notificar o watcher[ing1]
     {
         perror("error on the up operation for semaphore access (AG)");
         exit(EXIT_FAILURE);
     }
-    if (semUp(semgid, sh->ingredient[ing2]) == -1) //Ingrediente 2 passou a estar disponível
+
+    if (semUp(semgid, sh->ingredient[ing2]) == -1) //Ingrediente 2 passou a estar disponível. Vou notificar o watcher[ing2]
     {
         perror("error on the up operation for semaphore access (AG)");
         exit(EXIT_FAILURE);
     }
-    /* TODO: insert your code here */
 }
 
 /**
@@ -186,21 +188,21 @@ static void waitForCigarette()
         perror("error on the up operation for semaphore access (AG)");
         exit(EXIT_FAILURE);
     }
-    sh->fSt.st.agentStat = WAITING_CIG; //Mudar o estado para waiting_cig
-    saveState(nFic, &sh->fSt);          //guardar dentro da memoria partilhada
-    /* TODO: insert your code here */
+    //mudar o estado
+    sh->fSt.st.agentStat = WAITING_CIG;
+    saveState(nFic, &sh->fSt);
 
     if (semUp(semgid, sh->mutex) == -1)
     { /* leave critical region */
         perror("error on the up operation for semaphore access (AG)");
         exit(EXIT_FAILURE);
     }
-    if (semDown(semgid, sh->waitCigarette) == -1) //down pq fico à espera que espere de enrolar
+    //O Agent vai ficar à espera que o smoker acabe de enrolar
+    if (semDown(semgid, sh->waitCigarette) == -1)
     {
         perror("error on the up operation for semaphore access (AG)");
         exit(EXIT_FAILURE);
     }
-    /* TODO: insert your code here */
 }
 
 /**
@@ -215,9 +217,10 @@ static void closeFactory()
         perror("error on the up operation for semaphore access (AG)");
         exit(EXIT_FAILURE);
     }
-    sh->fSt.st.agentStat = CLOSING_A; //Mudar o estado para a fechar
+    //mudar o estado
+    sh->fSt.st.agentStat = CLOSING_A;
     sh->fSt.closing = true;
-    saveState(nFic, &sh->fSt); //guardar dentro da memoria partilhada
+    saveState(nFic, &sh->fSt);
 
     if (semUp(semgid, sh->mutex) == -1)
     { /* leave critical region */
@@ -225,8 +228,8 @@ static void closeFactory()
         exit(EXIT_FAILURE);
     }
 
-    /* TODO: insert your code here */
-    //Como os watchers estão à espera de ingredientes, eu ao dizer que os ingredientes estão disponíveis, acordo-os para eles dps fecharem
+    //Como os watchers estão à espera de ingredientes, eu ao notificar que os ingredientes estão disponíveis vou acordá-los de modo a que posteriormente eles também terminem
+    
     if (semUp(semgid, sh->ingredient[0]) == -1)
     {
         perror("error on the up operation for semaphore access (AG)");

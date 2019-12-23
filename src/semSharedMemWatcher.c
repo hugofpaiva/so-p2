@@ -151,6 +151,7 @@ static bool waitForIngredient(int id)
         exit(EXIT_FAILURE);
     }
 
+    //mudar estado
     sh->fSt.st.watcherStat[id] = WAITING_ING;
     saveState(nFic, &sh->fSt);
 
@@ -160,14 +161,12 @@ static bool waitForIngredient(int id)
         exit(EXIT_FAILURE);
     }
 
-    //waiting for Agent
+    //Watcher vai esperar por uma notificação do Agent
     if (semDown(semgid, sh->ingredient[id]) == -1)
     { /* enter critical region */
         perror("error on the up operation for semaphore access (SM)");
         exit(EXIT_FAILURE);
     }
-
-    /* TODO: insert your code here */
 
     if (semDown(semgid, sh->mutex) == -1)
     { /* enter critical region */
@@ -175,12 +174,16 @@ static bool waitForIngredient(int id)
         exit(EXIT_FAILURE);
     }
 
+    //verificar se está a fechar
     if (sh->fSt.closing == true)
     {
         sh->fSt.st.watcherStat[id] = CLOSING_W;
+        saveState(nFic, &sh->fSt);
         ret = false;
+
+        //Notificar o smoker
         if (semUp(semgid, sh->wait2Ings[id]) == -1)
-        { /* exit critical region */
+        {
             perror("error on the down operation for semaphore access (WT)");
             exit(EXIT_FAILURE);
         }
@@ -215,18 +218,20 @@ static int updateReservations(int id)
         exit(EXIT_FAILURE);
     }
 
+    // mudar o estado
     sh->fSt.st.watcherStat[id] = UPDATING;
+    // reservar o ingrediente deste watcher
     sh->fSt.reserved[id]++;
 
+    // Veriicar qual o smoker que pode fazer um cigarro
     if (sh->fSt.reserved[TOBACCO] > 0 && sh->fSt.reserved[PAPER] > 0)
         ret = MATCHES;
-    if (sh->fSt.reserved[TOBACCO] > 0 && sh->fSt.reserved[MATCHES] > 0)
+    else if (sh->fSt.reserved[TOBACCO] > 0 && sh->fSt.reserved[MATCHES] > 0)
         ret = PAPER;
-    if (sh->fSt.reserved[MATCHES] > 0 && sh->fSt.reserved[PAPER] > 0)
+    else if (sh->fSt.reserved[MATCHES] > 0 && sh->fSt.reserved[PAPER] > 0)
         ret = TOBACCO;
 
     saveState(nFic, &sh->fSt);
-    /* TODO: insert your code here */
 
     if (semUp(semgid, sh->mutex) == -1)
     { /* exit critical region */
@@ -253,15 +258,17 @@ static void informSmoker(int id, int smokerReady)
         perror("error on the up operation for semaphore access (WT)");
         exit(EXIT_FAILURE);
     }
+
+    // mudar o estado
     sh->fSt.st.watcherStat[id] = INFORMING;
 
+    // Vou informar o smoker que pode fazer um cigarro mas antes retiro estes ingredientes dos reservados pois irão ser utilizados
     int other_ing1 = (smokerReady + 1) % 3;
     int other_ing2 = (smokerReady + 2) % 3;
-
     sh->fSt.reserved[other_ing1]--;
     sh->fSt.reserved[other_ing2]--;
+
     saveState(nFic, &sh->fSt);
-    /* TODO: insert your code here */
 
     if (semUp(semgid, sh->mutex) == -1)
     { /* exit critical region */
@@ -269,7 +276,7 @@ static void informSmoker(int id, int smokerReady)
         exit(EXIT_FAILURE);
     }
 
-    /* TODO: insert your code here */
+    // Notificar o smoker que pode fazer um cigarro
     if (semUp(semgid, sh->wait2Ings[smokerReady]) == -1)
     { /* exit critical region */
         perror("error on the down operation for semaphore access (WT)");
