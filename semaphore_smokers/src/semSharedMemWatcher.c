@@ -179,18 +179,13 @@ static bool waitForIngredient(int id)
     {
         sh->fSt.st.watcherStat[id] = CLOSING_W;
         ret = false;
+        if (semUp(semgid, sh->wait2Ings[id]) == -1)
+        { /* exit critical region */
+            perror("error on the down operation for semaphore access (WT)");
+            exit(EXIT_FAILURE);
+        }
     }
-    else
-    {
-    }
-
     if (semUp(semgid, sh->mutex) == -1)
-    { /* exit critical region */
-        perror("error on the down operation for semaphore access (WT)");
-        exit(EXIT_FAILURE);
-    }
-
-    if (semUp(semgid, sh->wait2Ings[id]) == -1)
     { /* exit critical region */
         perror("error on the down operation for semaphore access (WT)");
         exit(EXIT_FAILURE);
@@ -222,14 +217,13 @@ static int updateReservations(int id)
 
     sh->fSt.st.watcherStat[id] = UPDATING;
     sh->fSt.reserved[id]++;
-    
-    if( sh->fSt.reserved[TOBACCO] > 0 && sh->fSt.reserved[PAPER] > 0  )
-        ret = MATCHES;
-    if( sh->fSt.reserved[TOBACCO] > 0 && sh->fSt.reserved[MATCHES] > 0)
-        ret = PAPER;
-    if( sh->fSt.reserved[MATCHES] > 0 && sh->fSt.reserved[PAPER] > 0  )
-        ret = TOBACCO;
 
+    if (sh->fSt.reserved[TOBACCO] > 0 && sh->fSt.reserved[PAPER] > 0)
+        ret = MATCHES;
+    if (sh->fSt.reserved[TOBACCO] > 0 && sh->fSt.reserved[MATCHES] > 0)
+        ret = PAPER;
+    if (sh->fSt.reserved[MATCHES] > 0 && sh->fSt.reserved[PAPER] > 0)
+        ret = TOBACCO;
 
     saveState(nFic, &sh->fSt);
     /* TODO: insert your code here */
@@ -260,6 +254,12 @@ static void informSmoker(int id, int smokerReady)
         exit(EXIT_FAILURE);
     }
     sh->fSt.st.watcherStat[id] = INFORMING;
+
+    int other_ing1 = (smokerReady + 1) % 3;
+    int other_ing2 = (smokerReady + 2) % 3;
+
+    sh->fSt.reserved[other_ing1]--;
+    sh->fSt.reserved[other_ing2]--;
     saveState(nFic, &sh->fSt);
     /* TODO: insert your code here */
 
