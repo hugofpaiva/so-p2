@@ -35,6 +35,7 @@ cd run
 
 ## Detalhes
 
+É possível encontrar todos os detalhes, nomeadamente os resultados, no [Relatório do Trabalho](/relatorio/SO_Report_2.pdf).
 
 ## Autores
 
