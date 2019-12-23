@@ -222,19 +222,14 @@ static int updateReservations(int id)
 
     sh->fSt.st.watcherStat[id] = UPDATING;
     sh->fSt.reserved[id]++;
-    for (int i = 0; i < 3; i++)
-    {
-        if (i != id && sh->fSt.reserved[i] != 0)
-        {
-            for (int l = 0; l < 3; l++)
-            {
-                if (l != id && l != i)
-                {
-                    ret = l;
-                }
-            }
-        }
-    }
+    
+    if( sh->fSt.reserved[TOBACCO] > 0 && sh->fSt.reserved[PAPER] > 0  )
+        ret = MATCHES;
+    if( sh->fSt.reserved[TOBACCO] > 0 && sh->fSt.reserved[MATCHES] > 0)
+        ret = PAPER;
+    if( sh->fSt.reserved[MATCHES] > 0 && sh->fSt.reserved[PAPER] > 0  )
+        ret = TOBACCO;
+
 
     saveState(nFic, &sh->fSt);
     /* TODO: insert your code here */
