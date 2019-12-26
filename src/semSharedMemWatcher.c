@@ -147,7 +147,7 @@ static bool waitForIngredient(int id)
 
     if (semDown(semgid, sh->mutex) == -1)
     { /* enter critical region */
-        perror("error on the up operation for semaphore access (WT)");
+        perror("error on the down operation for semaphore access (WT)");
         exit(EXIT_FAILURE);
     }
 
@@ -157,20 +157,20 @@ static bool waitForIngredient(int id)
 
     if (semUp(semgid, sh->mutex) == -1)
     { /* exit critical region */
-        perror("error on the down operation for semaphore access (WT)");
+        perror("error on the up operation for semaphore access (WT)");
         exit(EXIT_FAILURE);
     }
 
     //Watcher vai esperar por uma notificação do Agent
     if (semDown(semgid, sh->ingredient[id]) == -1)
     { /* enter critical region */
-        perror("error on the up operation for semaphore access (SM)");
+        perror("error on the down operation for semaphore access (WT)");
         exit(EXIT_FAILURE);
     }
 
     if (semDown(semgid, sh->mutex) == -1)
     { /* enter critical region */
-        perror("error on the up operation for semaphore access (WT)");
+        perror("error on the down operation for semaphore access (WT)");
         exit(EXIT_FAILURE);
     }
 
@@ -184,13 +184,13 @@ static bool waitForIngredient(int id)
         //Notificar o smoker
         if (semUp(semgid, sh->wait2Ings[id]) == -1)
         {
-            perror("error on the down operation for semaphore access (WT)");
+            perror("error on the up operation for semaphore access (WT)");
             exit(EXIT_FAILURE);
         }
     }
     if (semUp(semgid, sh->mutex) == -1)
     { /* exit critical region */
-        perror("error on the down operation for semaphore access (WT)");
+        perror("error on the up operation for semaphore access (WT)");
         exit(EXIT_FAILURE);
     }
 
@@ -255,7 +255,7 @@ static void informSmoker(int id, int smokerReady)
 {
     if (semDown(semgid, sh->mutex) == -1)
     { /* enter critical region */
-        perror("error on the up operation for semaphore access (WT)");
+        perror("error on the down operation for semaphore access (WT)");
         exit(EXIT_FAILURE);
     }
 
@@ -272,14 +272,14 @@ static void informSmoker(int id, int smokerReady)
 
     if (semUp(semgid, sh->mutex) == -1)
     { /* exit critical region */
-        perror("error on the down operation for semaphore access (WT)");
+        perror("error on the up operation for semaphore access (WT)");
         exit(EXIT_FAILURE);
     }
 
     // Notificar o smoker que pode fazer um cigarro
     if (semUp(semgid, sh->wait2Ings[smokerReady]) == -1)
     { /* exit critical region */
-        perror("error on the down operation for semaphore access (WT)");
+        perror("error on the up operation for semaphore access (WT)");
         exit(EXIT_FAILURE);
     }
 }

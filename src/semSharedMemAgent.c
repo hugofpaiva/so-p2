@@ -137,7 +137,7 @@ static void prepareIngredients()
 
     if (semDown(semgid, sh->mutex) == -1)
     { /* enter critical region */
-        perror("error on the up operation for semaphore access (AG)");
+        perror("error on the down operation for semaphore access (AG)");
         exit(EXIT_FAILURE);
     }
     //Vou mudar o estado do agente para preparing porque vou começar a preparar os ingredientes
@@ -185,7 +185,7 @@ static void waitForCigarette()
 {
     if (semDown(semgid, sh->mutex) == -1)
     { /* enter critical region */
-        perror("error on the up operation for semaphore access (AG)");
+        perror("error on the down operation for semaphore access (AG)");
         exit(EXIT_FAILURE);
     }
     //mudar o estado
@@ -200,7 +200,7 @@ static void waitForCigarette()
     //O Agent vai ficar à espera que o smoker acabe de enrolar
     if (semDown(semgid, sh->waitCigarette) == -1)
     {
-        perror("error on the up operation for semaphore access (AG)");
+        perror("error on the down operation for semaphore access (AG)");
         exit(EXIT_FAILURE);
     }
 }
@@ -214,7 +214,7 @@ static void closeFactory()
 {
     if (semDown(semgid, sh->mutex) == -1)
     { /* enter critical region */
-        perror("error on the up operation for semaphore access (AG)");
+        perror("error on the down operation for semaphore access (AG)");
         exit(EXIT_FAILURE);
     }
     //mudar o estado
@@ -228,7 +228,7 @@ static void closeFactory()
         exit(EXIT_FAILURE);
     }
 
-    //Como os watchers estão à espera de ingredientes, eu ao notificar que os ingredientes estão disponíveis vou acordá-los de modo a que posteriormente eles também terminem
+    //Como os watchers estão à espera de ingredientes, ao notificar que os ingredientes estão disponíveis vou acordá-los de modo a que posteriormente eles também terminem
     
     if (semUp(semgid, sh->ingredient[0]) == -1)
     {

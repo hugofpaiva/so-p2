@@ -50,16 +50,12 @@
 \usepackage[tableposition=top]{caption}
 
 
-
-\frontmatter
-
 \definecolor{light-gray}{gray}{0.95}
 
 \renewcommand{\contentsname}{Índice}
 
 \begin{document}
 
-\selectlanguage{portuguese}
 
 \begin{titlepage}
 	\clearpage\thispagestyle{empty}
@@ -104,8 +100,7 @@
 \section{Introdução}
 \par Este trabalho prático foi desenvolvido com o objetivo de compreender os mecanismos associados à execução de processos e \textit{threads}. 
 
-\par Para empreender este propósito, foi pedido que se solucionasse um problema que envolve vários fumadores com necessidades distintas para fumar. Dito isto, implementou-se um programa em C que simula e soluciona o problema recorrendo a semáforos e a memória partilhada, de modo a sincronizar os vários processos independentes.
-
+\par Para empreender este propósito, foi pedido que se solucionasse um problema que envolve várias entidades que terão de colaborar entre si para um bom funcionamento do programa: os fumadores, os watchers e o agente. Dito isto, implementou-se um programa em \textit{C} que simula e soluciona o problema recorrendo a semáforos e a memória partilhada, de modo a sincronizar os vários processos independentes. 
 \clearpage
 
 \section{Contextualização}
@@ -116,15 +111,180 @@ Explicar por alto como funcionam os semáforos e threads
 
 \clearpage
 
-\subsection{O Problema dos Fumadores}
+\subsection{O problema dos Fumadores}
 
-Explicar o problema
+\par Este problema está relacionado com uma gestão de recursos envolvendo vários fumadores com necessidades distintas para fumar, sendo que cada um deles possui apenas 1 recurso com fontes inesgotáveis. Para esta gestão existe uma entidade que disponibiliza/gera recursos e outras que necessitam/gastam recursos, sendo que estas necessidades envolvem vários recursos de tipos distintos. 
+\par A dificuldade está em como fazer com que as entidades que necessitam dos recursos os usem nas alturas certas, sem que a entidade geradora de recursos faça a notificação direta às entidades gastadoras. Estas notificações vão ocorrer quando os pacotes que as entidades gastadoras necessitam estiverem completos e sem que tenham de fazer verificações desnecessárias para comprovar se já existem os recursos necessários.
+\par \textbf{Para a resolução do problema existem algumas diretrizes:}
+\begin{enumerate}
+  \item O \textit{Agent} notifica o \textit{Watcher} responsável por cada ingrediente sempre que produz um ingrediente desse tipo.
+  \item O \textit{Watcher} notifica o fumador sempre que ele pode fumar.
+  \item Os \textit{Watchers} partilham informação entre si para comprovar que os 2 ingredientes estão disponíveis e poderem notificar o \textit{Smoker} correto.
+  \item O \textit{Agent} apenas inicia um novo pacote quando o fumador já recolheu os ingredentes do pacote anterior.
+  \item Após a produção de 5 pacotes, o \textit{Agent} termina a produção de recursos, notificando os \textit{Watchers} para que terminem. Estes por sua vez notificam os \textit{Smokers} para terminarem a sua execução.
+\end{enumerate}
+\par Na implementação da simulação deste problema foi utilizado o código-fonte disponibilizado pelo docente da disciplina onde já se encontravam definidos vários dados necessários à resolução.
+
+\par Os recursos, tratados como ingredientes nesta implementação, que estão envolvidos neste processo são Tabaco, Fósforos e Papel. No ficheiro \textit{probConst.h} é possível encontrar estes ingredientes definidos, bem como outros parâmetros gerais, úteis à implementação:
+
+\begin{figure}[!h]
+    \centering
+    \includegraphics[scale=0.5]{images/Problem/generalparame.png}
+    \caption{Parâmetros gerais definidos no ficheiro \textit{probConst.h}}
+\end{figure}
+
+\clearpage
+
+\par Vão existir três entidades com as seguintes funções:
+\begin{itemize}
+  \item \textit{\textbf{Agent}} - Entidade que produz recursos em pacotes de 2 recursos distintos, ou seja, sempre que é produzido um pacote, apenas um fumador pode fumar. 
+  \item \textit{\textbf{Watcher}} - Entidade responsável por verificar se após a produção de um novo ingrediente de um pacote do \textit{Agente} há algum fumador que pode fumar. Existe um watcher por cada ingrediente.
+  \item \textit{\textbf{Smoker}} - Entidade que representa um fumador e que tem uma fonte inesgotável de um destes recursos, necessitando apenas dos outros 2.
+\end{itemize}
+\par Cada uma destas entidades têm ter várias estados associados à tarefa que estão atualmente a executar. Todos estes estados estão definidos, também, no ficheiro \textit{probConst.h}:
+
+\begin{figure}[!h]
+    \centering
+    \includegraphics[width=\textwidth]{images/Problem/estados.png}
+    \caption{Estados das várias entidades referentes ao problema, definidos no ficheiro \textit{probConst.h}}
+\end{figure}
+\clearpage
+\par O conteúdo da memória partilhada é definido na estrutura \textit{FULL\_STAT} e no array dos 7 semáforos usados durante a implementação, no ficheiro \textit{sharedDataSync.h}:
+\begin{figure}[!h]
+    \centering
+    \includegraphics[width=\textwidth]{images/Problem/sharedmem.png}
+    \caption{Definição dos tipos de dados e semáforos da memória partilhada no ficheiro \textit{sharedDataSync.h}}
+\end{figure}
+\clearpage
+\par A definição das estruturas \textit{FULL\_STAT} e \textit{STAT}, usadas na memória partilhada, com os tipos de dados de todo o problema bem como o estado das entidades, encontram-se no ficheiro \textit{probDataStruct.h}:
+\begin{figure}[!h]
+    \centering
+    \includegraphics[width=\textwidth]{images/Problem/full_stat.png}
+    \caption{Definição das estruturas \textit{FULL\_STAT} e \textit{STAT} no ficheiro \textit{probDataStruct.h}}
+\end{figure}
 
 \clearpage
 
 \section{Implementação}
 
-Explicar as implementações
+\par Recorrendo a semáforos e a memória partilhada, de modo a sincronizar os vários processos independentes, foi implementada uma resolução do problema a partir do código-fonte do professor. A explicação da implementação irá, portanto, inserir-se no código feito pelos alunos, nos locais e ficheiros definidos pelo docente da disciplina. 
+
+\par A utilização dos semáforos ao longo da solução serviu principalmente para controlar o acesso à memória partilhada, evitando assim potenciais colisões que as 3 entidades poderiam vir a ter durante a sua execução. As notificações trocadas entre as entidades foram também implementadas usando semáforos, permitindo a contínua execução do programa. Para uma melhor interpretação deste funcionamento, foi feita uma tabela que associa cada semáforo à sua função durante a resolução:\\
+FALTA A TABELA VOOOONIIITAAAA
+
+\clearpage
+
+\subsection{\textit{Agent}}
+
+\par Começando por implementar a solução da entidade \textit{Agent}, foi necessário alterar o ficheiro \textit{semSharedMemAgent.c} nos locais assinalados. As funções \textit{prepareIngredients()}, \textit{waitForCigarette()} e \textit{closeFactory()} foram modificadas da maneira que se segue.
+
+\subsubsection{\textit{prepareIngredients()}}
+
+\par Nesta função o Agente prepara 2 ingredientes. Para isso, após entrar na região crítica com o uso da função \textit{semDown()}, é atualizado o seu estado para \textit{PREPARING}, escolhendo-se posteriormente e de forma aleatória os 2 ingredientes para fazerem parte do novo pacote. Após esta escolha, o inventário é atualizado com as novas existências guardando-se estas novas alterações na memória partilhada. Já fora da região crítica, ambos os \textit{Watchers} referentes aos ingredientes gerados são notificados que os ingredientes estão disponíveis com o desbloqueio de dois semáforos pertencentes a cada ingrediente, através da função \textit{semUp()}.
+
+\begin{figure}[!h]
+    \centering
+    \includegraphics[width=\textwidth]{images/implementation/prepareings.png}
+    \caption{Função \textit{prepareIngredients()}}
+\end{figure}
+
+\subsubsection{\textit{waitForCigarette()}}
+
+\par Ao executar \textit{waitForCigarette()}, o Agente vai esperar que o Fumador acabe de enrolar o cigarro. Isto é alcançado entrando na região crítica, de modo a que o Agente altere o seu estado para \textit{WAITING\_CIG}, guardando-o depois na memória partilhada. Fora da região crítica, é feito um \textit{semDown()} para bloquear o semáforo \textit{waitCigarette}, o qual só é liberto quando o Fumador acabar de enrolar.
+
+\begin{figure}[!h]
+    \centering
+    \includegraphics[width=\textwidth]{images/implementation/waitcig.png}
+    \caption{Função \textit{waitForCigarette()}}
+\end{figure}
+
+\clearpage
+
+\subsubsection{\textit{closeFactory()}}
+
+\par Na função \textit{closeFactory()} o Agente vai fechar a fábrica de ingredientes. Assim, dentro da região crítica, este atualiza o seu estado para \textit{CLOSING\_A} e altera a flag \textit{closing} para \textit{true} guardando estas alterações em memória partilhada. Fora da região crítica, são notificados os 3 \textit{Watchers} desbloqueando os semáforos referentes a cada ingrediente. Desta forma, todos os \textit{Watchers} vão entrar em funcionamento e verificar que a fábrica está a fechar.
+
+\begin{figure}[!h]
+    \centering
+    \includegraphics[width=\textwidth]{images/implementation/closefact.png}
+    \caption{Função \textit{closeFactory()}}
+\end{figure}
+
+\subsection{\textit{Watcher}}
+\par Ao implementar a solução da entidade \textit{Watcher} foi necessário alterar o ficheiro \textit{semSharedMemWatcher.c} nos locais assinalados. As funções \textit{waitForIngredient()}, \textit{updateReservations()} e \textit{informSmoker()} foram modificadas da maneira que se segue.
+
+\subsubsection{\textit{waitForIngredient()}}
+
+\par Nesta função o \textit{Watcher} espera que o seu ingrediente esteja pronto. Para isso, após entrar na região crítica, é atualizado o seu estado para \textit{WAITING\_ING}, guardando-o na memória partilhada. Já fora da região crítica, é bloqueado o semáforo referente ao ingrediente desta entidade, ficando esta à espera da disponibilidade desse ingrediente. Quando este semáforo voltar a estar desbloqueado, volta-se a entrar na região crítica, verificando-se se a flag \textit{closing} está a \textit{true}. Nesse caso, é atualizado o estado do \textit{Watcher} para \textit{CLOSING\_W}, guardando-se na memória partilhada e mudando o \textit{return} para \textit{false}, notificando, ainda, antes de sair da região crítica, o Fumador com o mesmo id que o \textit{Watcher} em questão, para este também verificar se a fábrica está a fechar. Em caso contrário, não é feito nada.
+
+\begin{figure}[!h]
+    \centering
+    \includegraphics[scale=0.7]{images/implementation/waitforing.png}
+    \caption{Função \textit{waitForIngredient()}}
+\end{figure}
+
+\clearpage
+
+\subsubsection{\textit{updateReservations()}}
+
+\par Ao executar \textit{updateReservations()} o \textit{Watcher} atualiza as reservas na memória partilha e verifica se algum Fumador pode fumar. Isto é alcançado entrando na região crítica, de modo a que o \textit{Watcher} altere o seu estado para \textit{UPDATING} e incremente 1 à posição correspondente ao seu ingrediente no \textit{array} dos ingredientes reservados, guardando estes dados na memória partilhada. Ainda dentro da região crítica, é verificado se algum Fumador pode fazer um cigarro. Assim, é analisado o \textit{array} de ingredientes reservados e caso haja dois ingredientes com uma ou mais reservas, a função passa a retornar o \textit{id} do Fumador que não possui estes ingredientes.
+
+\begin{figure}[!h]
+    \centering
+    \includegraphics[width=\textwidth]{images/implementation/updateres.png}
+    \caption{Função \textit{updateReservations(}}
+\end{figure}
+
+\clearpage
+
+\subsubsection{\textit{informSmoker()}}
+
+\par Na função \textit{informSmoker()} o \textit{Watcher} vai informar o Fumador que pode usar os ingredientes disponíveis para enrolar um cigarro. Assim, dentro da região crítica, é atualizado o seu estado para \textit{INFORMING} e retirada uma unidade aos ingredientes prestes a ser utilizados pelo Fumador do \textit{array} dos ingredientes reservados, guardando estas alterações em memória partilhada. Fora da região crítica, é notificado o Fumador que pode enrolar um cigarro através da variável \textit{smokerReady} que foi retornada na última função analisada, aliada ao desbloqueio do semáforo \textit{wait2Ings} referente ao Fumador em questão.
+
+\begin{figure}[!h]
+    \centering
+    \includegraphics[width=\textwidth]{images/implementation/informsmok.png}
+    \caption{Função \textit{informSmoker()}}
+\end{figure}
+
+\subsection{\textit{Smoker}}
+\par Para implementar a solução da entidade \textit{Smoker} foi necessário alterar o ficheiro \textit{semSharedMemSmoker.c} nos locais assinalados. As funções \textit{waitForIngredients()}, \textit{rollingCigarette()} e \textit{smoke()} foram modificadas da maneira que se segue.
+
+\subsubsection{\textit{waitForIngredients()}}
+
+\par Na função \textit{waitForIngredients()} o Fumador espera pelos 2 ingredientes que ele não tem. Assim, dentro da região crítica, este atualiza o seu estado para \textit{WAITING\_2ING} e guarda em memória partilhada. Fora da região crítica, é bloqueado um semáforo, de modo ao Fumador esperar que o \textit{Watcher} o notifique da disponibilidade dos ingredientes. Posteriomente, volta-se a entrar na região crítica verificando-se se a flag \textit{closing} está a \textit{true}. Em caso afirmativo, é alterado o estado para \textit{CLOSING\_S} e o retorno da função para \textit{false}, guardando estes dados na memória partilhada. Em caso contrário, o Fumador vai retirar os ingredientes que irá usar do \textit{array} dos ingredientes.
+
+\begin{figure}[!h]
+    \centering
+    \includegraphics[scale=0.7]{images/implementation/waitforings.png}
+    \caption{Função \textit{waitForIngredients()}}
+\end{figure}
+
+\clearpage
+
+\subsubsection{\textit{rollingCigarette()}}
+
+\par Ao executar \textit{rollingCigarette()} o Fumador vai enrolar um cigarro. Isto é alcançado entrando na região crítica, de modo a que o Fumador altere o seu estado para \textit{ROLLING}, guardando-o depois na memória partilhada. Fora da região crítica, se o tempo para enrolar o cigarro, gerado anteriormente, for maior que 0, o processo é suspenso durante esse tempo através da função \textit{usleep}. Antes da função terminar, é desbloqueado o semáforo \textit{waitCigarette} através do qual é notificado o \textit{Agent} que o Fumador acabou de enrolar.
+
+\begin{figure}[!h]
+    \centering
+    \includegraphics[width=\textwidth]{images/implementation/rolling.png}
+    \caption{Função \textit{rollingCigarette()}}
+\end{figure}
+
+\clearpage
+
+\subsubsection{\textit{smoke()}}
+
+\par Na função \textit{smoke()} o Fumador vai fumar. Assim, na região crítica, é alterado o seu estado para \textit{SMOKING} e incrementado 1 à posição correspondente ao seu \textit{id} no \textit{array} dos cigarros fumados, guardando estes dados na memória partilhada. Já fora da região crítica, é gerado um tempo para fumar e se este for mais que 0, o processo é suspenso durante esse tempo através da função \textit{usleep}.
+
+\begin{figure}[!h]
+    \centering
+    \includegraphics[width=\textwidth]{images/implementation/smoke.png}
+    \caption{Função \textit{smoke(}}
+\end{figure}
+
+
 
 \clearpage
 

@@ -162,7 +162,7 @@ static bool waitForIngredients(int id)
 
     if (semDown(semgid, sh->mutex) == -1)
     { /* enter critical region */
-        perror("error on the up operation for semaphore access (SM)");
+        perror("error on the down operation for semaphore access (SM)");
         exit(EXIT_FAILURE);
     }
 
@@ -171,7 +171,7 @@ static bool waitForIngredients(int id)
 
     if (semUp(semgid, sh->mutex) == -1)
     { /* exit critical region */
-        perror("error on the down operation for semaphore access (SM)");
+        perror("error on the up operation for semaphore access (SM)");
         exit(EXIT_FAILURE);
     }
 
@@ -184,7 +184,7 @@ static bool waitForIngredients(int id)
 
     if (semDown(semgid, sh->mutex) == -1)
     { /* enter critical region */
-        perror("error on the up operation for semaphore access (SM)");
+        perror("error on the down operation for semaphore access (SM)");
         exit(EXIT_FAILURE);
     }
     if (sh->fSt.closing == true)
@@ -205,7 +205,7 @@ static bool waitForIngredients(int id)
 
     if (semUp(semgid, sh->mutex) == -1)
     { /* exit critical region */
-        perror("error on the down operation for semaphore access (SM)");
+        perror("error on the up operation for semaphore access (SM)");
         exit(EXIT_FAILURE);
     }
 
@@ -263,7 +263,7 @@ static void smoke(int id)
 {
     if (semDown(semgid, sh->mutex) == -1)
     { /* enter critical region */
-        perror("error on the up operation for semaphore access (SM)");
+        perror("error on the down operation for semaphore access (SM)");
         exit(EXIT_FAILURE);
     }
     // alterar o estado e aumentar o número de cigarros fumados
@@ -273,7 +273,7 @@ static void smoke(int id)
 
     if (semUp(semgid, sh->mutex) == -1)
     { /* exit critical region */
-        perror("error on the down operation for semaphore access (SM)");
+        perror("error on the up operation for semaphore access (SM)");
         exit(EXIT_FAILURE);
     }
 
