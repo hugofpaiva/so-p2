@@ -110,7 +110,7 @@ Uma thread é a unidade básica da utilização do CPU. Um processo que utilize 
 \subsection{Sincronização}
 \par Considere-se agora um conjunto de processos. Caso esses partilhem uma variável que individualmente será, por eles, manipulada, pode acontecer o output acabar por não ser o esperado porque depende da ordem de manipulação dessa mesma variável. Isto é chamado de \textbf{condição de corrida}. Para combater algo do género, é necessário garantir que apenas um processo de cada vez pode estar a modificar esse tipo de variáveis partilhadas - ou seja, torna-se mandatório haver algum tipo de \textbf{sincronização}.
 \par Cada processo tem um pedaço de código onde irá, possivelmente, alterar uma variável comum a todos os processos. Esta é chamada a \textbf{região crítica}. O mais importante, quando se trata de sincronização dos diferentes processos, é garantir que quando um deles entra na região crítica, mais nenhum pode entrar na região crítica que lhe compete. No entanto, se nenhum processo se encontra em execução numa destas regiões, caso um deles queira aceder, selecionar qual dos processos pode entrar é uma decisão que tem de ser tomada e não pode ser adiada indefinidamente. Terá, também, de haver um número limite de vezes que um dado processo tem acesso à região, sendo que outro pediu previamente acesso e ainda não lho foi garantido.
-\par Os \textbf{semáforos}, uma solução hardware ao problema das regiões críticas, tornam-se vitais para sincronizar as tarefas realizadas pelas diferentes threads de um mesmo processo, permitindo também uma comunicação eficaz e fulcral entre as mesmas, para um bom funcionamento global. Um semáforo contém uma variável do tipo \textit{integer} que pode ser acedida de através de duas operações default: \textit{acquire()} e \textit{release()}, para além de quando se dá a sua inicialização. Modificações a essa variável através dessas funções são feitas de maneira indivisível. Isto é, quando uma das threads altera este valor, não poderá ser modificado simultaneamente por mais nenhuma. No caso de semáforos do tipo \textbf{mutex}, são \underline{semáforos binários} cujo valor pode apenas ser 0 ou 1, garantido sempre \textbf{exclusão mútua}. Existem também \underline{semáforos contadores} que podem ser utilizados para controlar o número de acessos a regiões críticas num dado processo.
+\par Os \textbf{semáforos}, uma solução hardware ao problema das regiões críticas, tornam-se vitais para sincronizar as tarefas realizadas pelas diferentes threads de um mesmo processo, permitindo também uma comunicação eficaz e fulcral entre as mesmas, para um bom funcionamento global. Um semáforo contém uma variável do tipo \textit{integer} que pode ser acedida de através de duas operações default: \textit{down()} e \textit{up()}, para além de quando se dá a sua inicialização. Estas duas operações têm como objetivo, respetivamente, entrar e sair na região crítica, bem como esperar por e entregar notificações. Modificações a essa variável através dessas funções são feitas de maneira indivisível. Isto é, quando uma das threads altera este valor, não poderá ser modificado simultaneamente por mais nenhuma. No caso de semáforos do tipo \textbf{mutex}, são \underline{semáforos binários} cujo valor pode apenas ser 0 ou 1, garantido sempre \textbf{exclusão mútua}. Existem também \underline{semáforos contadores} que podem ser utilizados para controlar o número de acessos a regiões críticas num dado processo.
 
 \clearpage
 
@@ -309,7 +309,7 @@ Uma thread é a unidade básica da utilização do CPU. Um processo que utilize 
     \centering
     \includegraphics[scale=0.5]{images/resultados/res2.png}
     \caption{Resultados obtidos}
-    \vspace*{10in} $forçar ir para cima
+    \vspace*{10in} %forçar ir para cima
 \end{figure}
 
 
@@ -317,8 +317,8 @@ Uma thread é a unidade básica da utilização do CPU. Um processo que utilize 
 
 \section{Conclusão}
 \par Terminando, pensa-se que, de acordo com as metas estabelecidas pelo docente, o trabalho foi bem sucedido. Uma das principais dificuldades sentidas esteve relacionada com a primeira análise e compreensão de todo o código previamente escrito pelo professor. No entanto, assim que se finalizou uma das entidades, percebendo-se bem a sua implementação, facilmente se desenvolveu o resto do trabalho.
-\par Aprofundaram-se os conhecimentos sobre o funcionamento de semáforos e sincronização de \textit{threads} com este trabalho, sendo mais simples interiorizar certos pormenores a partir de um projeto como este, da mesma maneira que através da realização dos guiões práticos propostos sobre estes temas.
-\par Assim sendo, como os resultados obtidos podem ser considerados semelhantes aos do docente, concluímos que esta poderá ser uma das possíveis soluções.
+\par Aprofundaram-se os conhecimentos sobre o funcionamento de semáforos e sincronização de \textit{threads}, sendo mais simples interiorizar certos pormenores a partir de um projeto como este, da mesma maneira que através da realização dos guiões práticos propostos sobre estes temas.
+\par Assim sendo, como os resultados obtidos podem ser considerados semelhantes aos do docente, é concluído que esta poderá ser uma das possíveis soluções.
 
 \clearpage
 
