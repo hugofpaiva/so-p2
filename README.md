@@ -45,4 +45,4 @@ cd run
  - **Carolina Araújo - 93248**
  
 ## Nota
-Classificação obtida de **17** valores em 20.
+Classificação obtida de **19** valores em 20.
