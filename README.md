@@ -43,3 +43,6 @@ cd run
 
  - **Hugo Paiva de Almeida - 93195**
  - **Carolina Araújo - 93248**
+ 
+## Nota
+Classificação obtida de **17** valores em 20.
